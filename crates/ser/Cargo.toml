@@ -1,0 +1,17 @@
+[package]
+name = "cab-ser"
+description = "A serialization service for the OP Stack"
+version = "0.0.1"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+# Workspace
+anyow.workspace = true
+tracing.workspace = true
+
+[features]
+default = []
