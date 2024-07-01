@@ -9,7 +9,7 @@ use kona_derive::{
 use reth::transaction_pool::TransactionPool;
 use reth_exex::{ExExContext, ExExEvent};
 use reth_node_api::FullNodeComponents;
-use reth_tracing::tracing::{debug, error, info, warn};
+use reth_tracing::tracing::{debug, error, info};
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},

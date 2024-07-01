@@ -1,0 +1,24 @@
+name: Rust Docs
+
+on:
+  push:
+    branches: [main]
+  merge_group:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cargo-doc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+      - run: just lint-docs
+      - run: just test-docs

@@ -1,0 +1,24 @@
+name: Rust Tests
+
+on:
+  push:
+    branches: [main]
+  merge_group:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cargo-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+      - uses: taiki-e/install-action@nextest
+      - name: cargo test
+        run: cargo nextest run --release --workspace --all --locked
