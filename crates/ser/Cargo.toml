@@ -10,8 +10,11 @@ homepage.workspace = true
 
 [dependencies]
 # Workspace
-anyow.workspace = true
+anyhow.workspace = true
 tracing.workspace = true
+async-trait.workspace = true
+serde = { workspace = true, optional = true }
 
 [features]
-default = []
+default = ["serde"]
+serde = ["dep:serde"]
