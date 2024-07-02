@@ -21,9 +21,11 @@
 
 ## What's Cabrinha?
 
-Cabrinha is a suite of extensible components of the [OP Stack][op-stack].
+_`cabrinha`: little goat_
 
-Built on top of these components, the [execution extension][exex] offers an executable that runs the full [OP Stack][op-stack] as a singular process.
+Cabrinha is a suite of extensible [OP Stack][op-stack] components.
+
+Built on top of these components, [`goat`][goat] is an [execution extension][exex] that runs the [OP Stack][op-stack] as a single executable process.
 
 ## Development Status
 
@@ -31,12 +33,14 @@ Built on top of these components, the [execution extension][exex] offers an exec
 
 ## Book
 
-The [book][book] contains a more in-depth overview of the project, contributor guidelines, tutorials for getting started with building your own OP Stack components.
+The [book][book] contains a more in-depth overview of the project, contributor guidelines, tutorials for composing you own OP Stack with custom components.
 
 ## Credits
 
 `cabrinha` is inspired by the work of several teams, namely [OP Labs][op-labs] and other contributors' work on [`kona`][kona].
 
+[exex]: https://www.paradigm.xyz/2024/05/reth-exex
+[goat]: ./bin/goat/
 [kona]: https://github.com/ethereum-optimism/kona
 [op-stack]: https://github.com/ethereum-optimism/optimism
 [book]: https://refcell.github.io/cabrinha
