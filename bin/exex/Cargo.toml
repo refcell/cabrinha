@@ -35,7 +35,7 @@ reth-tracing = { git = "https://github.com/paradigmxyz/reth", branch = "main", v
 alloy-provider = { version = "0.1", default-features = false }
 alloy-rpc-types = { version = "0.1" }
 alloy-transport = { version = "0.1", default-features = false }
-alloy-primitives = { version = "0.1", features = ["serde"] }
+alloy-primitives = { version = "0.7", features = ["serde"] }
 alloy-eips = { version = "0.1", default-features = false }
 alloy-consensus = { version = "0.1", default-features = false }
 alloy-rlp = "0.3.4"
