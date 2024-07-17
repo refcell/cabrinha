@@ -32,7 +32,7 @@ reth-provider = { git = "https://github.com/paradigmxyz/reth", branch = "main", 
 reth-tracing = { git = "https://github.com/paradigmxyz/reth", branch = "main", version = "1.0.0" }
 
 # Alloy Deps
-alloy-provider = { version = "0.1", default-features = false }
+alloy-provider = { version = "0.2", default-features = false }
 alloy-rpc-types = { version = "0.1" }
 alloy-transport = { version = "0.1", default-features = false }
 alloy-primitives = { version = "0.1", features = ["serde"] }
