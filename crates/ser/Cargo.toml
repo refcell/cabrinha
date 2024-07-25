@@ -13,8 +13,18 @@ homepage.workspace = true
 anyhow.workspace = true
 tracing.workspace = true
 async-trait.workspace = true
+alloy-primitives.workspace = true
+alloy-rpc-types.workspace = true 
+kona-derive.workspace = true
+
+# `serde` feature dependencies
 serde = { workspace = true, optional = true }
 
 [features]
 default = ["serde"]
-serde = ["dep:serde"]
+serde = [
+  "dep:serde",
+  "kona-derive/serde",
+  "alloy-rpc-types/serde",
+  "alloy-primitives/serde",
+]

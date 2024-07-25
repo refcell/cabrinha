@@ -1,5 +1,47 @@
 //! Sync types for the optimism rollup node.
 
+pub use alloy_primitives::{BlockNumber, B256};
+pub use alloy_rpc_types::BlockId;
+
+/// The block reference for an L2 block.
+///
+/// See: <https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/id.go#L33>
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub struct L2BlockRef {
+    /// The block hash.
+    pub hash: B256,
+    /// The block number.
+    pub number: BlockNumber,
+    /// The parent hash.
+    pub parent_hash: B256,
+    /// The timestamp.
+    pub timestamp: u64,
+    /// The L1 origin.
+    #[cfg_attr(feature = "serde", serde(rename = "l1Origin"))]
+    pub l1_origin: BlockId,
+    /// The sequence number.
+    pub sequence_number: u64,
+}
+
+/// The block reference for an L1 block.
+///
+/// See: <https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/id.go#L52>
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub struct L1BlockRef {
+    /// The block hash.
+    pub hash: B256,
+    /// The block number.
+    pub number: BlockNumber,
+    /// The parent hash.
+    pub parent_hash: B256,
+    /// The timestamp.
+    pub timestamp: u64,
+}
+
 /// The [`SyncStatus`][ss] of an Optimism Rollup Node.
 ///
 /// [ss]: https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/sync_status.go#L5
