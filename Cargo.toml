@@ -1,6 +1,6 @@
 [workspace]
-members = ["crates/*", "bin/*"]
-default-members = []
+members = ["crates/*", "bin/goat"]
+default-members = ["bin/goat"]
 exclude = []
 resolver = "2"
 
@@ -20,8 +20,6 @@ async-trait = "0.1.80"
 alloy-primitives = "0.1.0"
 alloy-rpc-types = { version = "0.1.3", features = ["eth"] }
 kona-derive = { git = "https://github.com/ethereum-optimism/kona", default-features = false }
-
-# `serde` feature dependencies
 serde = { version = "1.0.203", features = ["derive"] }
 
 [profile.dev]

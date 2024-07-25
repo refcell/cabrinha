@@ -1,12 +1,17 @@
 set positional-arguments
-alias t := tests
-alias l := lints
+alias t := test
 alias f := fmt
+alias l := lint
 alias b := build
+alias opt8n := run
 
 # default recipe to display help information
 default:
   @just --list
+
+# Runs the goat binary
+goat:
+  cargo run --bin goat
 
 # Run all tests
 tests: test test-docs
@@ -19,25 +24,28 @@ test *args='':
 test-docs:
   cargo test --doc --all --locked
 
-# Lint the workspace for all available targets
-lints: lint lint-docs
+# Fixes and checks all workspace formatting
+fmt: fmt-fix fmt-check
 
-# Lint the workspace
-lint: fmt-native-check
-  cargo +nightly clippy --workspace --all --all-features --all-targets -- -D warnings
+# Fixes the formatting of the workspace
+fmt-fix:
+  cargo +nightly fmt --all
+
+# Check the formatting of the workspace
+fmt-check:
+  cargo +nightly fmt --all -- --check
+
+# Lint workspace and docs
+lint: lint-docs clippy
 
 # Lint the Rust documentation
 lint-docs:
   RUSTDOCFLAGS="-D warnings" cargo doc --all --no-deps --document-private-items
 
-# Fixes the formatting of the workspace
-fmt:
-  cargo +nightly fmt --all
+# Run clippy lints on the workspace
+clippy:
+  cargo +nightly clippy --workspace --all --all-features --all-targets -- -D warnings
 
-# Check the formatting of the workspace
-fmt-native-check:
-  cargo +nightly fmt --all -- --check
-
-# Build
+# Build for the native target
 build *args='':
   cargo build --workspace --all $@

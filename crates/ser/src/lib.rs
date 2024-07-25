@@ -12,7 +12,7 @@
 extern crate alloc;
 
 mod traits;
-pub use traits::RollupNode;
+pub use traits::{L1Provider, L2Provider, RollupNode};
 
 mod types;
 pub use types::SyncStatus;
