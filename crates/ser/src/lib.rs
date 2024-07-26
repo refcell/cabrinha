@@ -15,4 +15,4 @@ mod traits;
 pub use traits::{L1Provider, L2Provider, RollupNode};
 
 mod types;
-pub use types::SyncStatus;
+pub use types::{block_to_batch, L1BlockRef, L2BlockRef, SyncStatus};

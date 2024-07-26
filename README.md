@@ -3,7 +3,7 @@
 </h1>
 
 <h4 align="center">
-    Feature complete OP Stack as an execution extension.
+    A suite of `std` components for the OP Stack in rust.
 </h4>
 
 <p align="center">
@@ -25,9 +25,11 @@
 
 _`cabrinha`: little goat_
 
-Cabrinha is a suite of extensible [OP Stack][op-stack] components for sequencing.
+Cabrinha is a suite of `std` components for the [OP Stack][op-stack].
 
-Built on top of these components, [`goat`][goat] is the rust-equivalent of the [op-batcher][op-batcher].
+Where [kona][kona] contains fault-proof specific `no_std` components, non-fault proof
+components of the [OP Stack][op-stack] do not need to be `no_std`. Cabrinha is where
+these `std` components live.
 
 ## Status
 
@@ -37,13 +39,11 @@ Built on top of these components, [`goat`][goat] is the rust-equivalent of the [
 
 OP Stack components are individually defined in [crates](./crates/).
 
-The batcher (`goat`) provides an executable that can be run with `just goat` (using [Just][j]).
-
 To learn more, see the [book][book].
 
 ## Book
 
-The [book][book] contains a more in-depth overview of the project, contributor guidelines, tutorials for working with `ser`.
+The [book][book] contains a more in-depth overview of the project, contributor guidelines, tutorials for working with Cabrinha crates and binaries.
 
 ## Credits
 

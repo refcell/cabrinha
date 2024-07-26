@@ -1,5 +1,5 @@
 [package]
-name = "cab-ser"
+name = "opser"
 description = "A serialization service for the OP Stack"
 version = "0.0.1"
 edition.workspace = true
@@ -25,6 +25,5 @@ default = ["serde"]
 serde = [
   "dep:serde",
   "kona-derive/serde",
-  "alloy-rpc-types/serde",
   "alloy-primitives/serde",
 ]

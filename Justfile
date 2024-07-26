@@ -3,7 +3,6 @@ alias t := test
 alias f := fmt
 alias l := lint
 alias b := build
-alias opt8n := run
 
 # default recipe to display help information
 default:

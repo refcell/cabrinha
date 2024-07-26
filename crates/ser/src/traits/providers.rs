@@ -1,9 +1,10 @@
 //! Providers for the chain.
 
-use anyhow::Result;
-use async_trait::async_trait;
+use alloc::boxed::Box;
 use alloy_primitives::Address;
 use alloy_rpc_types::{Block, Header};
+use anyhow::Result;
+use async_trait::async_trait;
 
 /// A provider for the L1 Chain.
 #[async_trait]

@@ -1,7 +1,7 @@
 //! Sync types for the optimism rollup node.
 
-pub use alloy_primitives::{BlockNumber, B256};
-pub use alloy_rpc_types::BlockId;
+use alloy_primitives::{BlockNumber, B256};
+use alloy_rpc_types::BlockId;
 
 /// The block reference for an L2 block.
 ///
