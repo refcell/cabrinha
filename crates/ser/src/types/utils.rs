@@ -1,46 +1,56 @@
 //! Contains utilities for working with types and conversions.
 
-use alloy_rpc_types::Block;
-use anyhow::Result;
-use kona_derive::types::{RollupConfig, SingleBatch};
+use alloy_rpc_types::{Block, BlockTransactions};
+use alloy_consensus::TxEnvelope;
+use anyhow::{ensure, Result};
+use alloc::vec::Vec;
+use alloy_eips::eip2718::Encodable2718;
+use kona_derive::types::{L1BlockInfoTx, RollupConfig, SingleBatch, RawTransaction};
 
 /// Converts a [Block] into a [SingleBatch].
-pub fn block_to_batch(_: &RollupConfig, _: &Block) -> Result<SingleBatch> {
-    unimplemented!()
+pub fn block_to_batch(cfg: &RollupConfig, block: &Block) -> Result<(SingleBatch, L1BlockInfoTx)> {
+    // Ensure the block has transactions
+    ensure!(!block.transactions.is_empty(), "block {:?} has no transactions", block.header.hash);
+    let txs = match block.transactions {
+        BlockTransactions::Full(ref txs) => txs,
+        _ => return Err(anyhow::anyhow!("missing full transactions for block: {:?}", block.header.hash)),
+    };
+
+    // Encode the transactions to raw bytes
+    let mut raw_txs = Vec::with_capacity(txs.len());
+    for tx in txs {
+        // Skip deposit transactions
+        if tx.transaction_type == Some(0x7E) {
+            continue;
+        }
+        let envelope = TxEnvelope::try_from(tx.clone()).map_err(|e| anyhow::anyhow!(e))?;
+        let mut buf = Vec::new();
+        envelope.encode_2718(&mut buf);
+        raw_txs.push(RawTransaction(buf.into()));
+    }
+
+    // Parse the L1 Info transaction
+    let l1_info_tx = match txs.first() {
+        Some(tx) => tx,
+        None => return Err(anyhow::anyhow!("block {:?} has no transactions", block.header.hash)),
+    };
+    ensure!(l1_info_tx.transaction_type == Some(0x7E), "first transaction in block (l1 info tx) {:?} is not a deposit", block.header.hash);
+    let envelope = TxEnvelope::try_from(l1_info_tx.clone()).map_err(|e| anyhow::anyhow!(e))?;
+    let mut buf = Vec::new();
+    envelope.encode_2718(&mut buf);
+    let l1_info = l1_block_info_from_bytes(cfg, block.header.timestamp, &buf)?;
+
+    Ok((SingleBatch {
+        parent_hash: block.header.parent_hash,
+        epoch_num: l1_info.id().number,
+        epoch_hash: l1_info.id().hash,
+        timestamp: block.header.timestamp,
+        transactions: raw_txs,
+    }, l1_info))
 }
 
-// // BlockToSingularBatch transforms a block into a batch object that can easily be RLP encoded.
-// func BlockToSingularBatch(rollupCfg *rollup.Config, block *types.Block) (*SingularBatch, *L1BlockInfo, error) {
-// 	if len(block.Transactions()) == 0 {
-// 		return nil, nil, fmt.Errorf("block %v has no transactions", block.Hash())
-// 	}
-//
-// 	opaqueTxs := make([]hexutil.Bytes, 0, len(block.Transactions()))
-// 	for i, tx := range block.Transactions() {
-// 		if tx.Type() == types.DepositTxType {
-// 			continue
-// 		}
-// 		otx, err := tx.MarshalBinary()
-// 		if err != nil {
-// 			return nil, nil, fmt.Errorf("could not encode tx %v in block %v: %w", i, tx.Hash(), err)
-// 		}
-// 		opaqueTxs = append(opaqueTxs, otx)
-// 	}
-//
-// 	l1InfoTx := block.Transactions()[0]
-// 	if l1InfoTx.Type() != types.DepositTxType {
-// 		return nil, nil, ErrNotDepositTx
-// 	}
-// 	l1Info, err := L1BlockInfoFromBytes(rollupCfg, block.Time(), l1InfoTx.Data())
-// 	if err != nil {
-// 		return nil, l1Info, fmt.Errorf("could not parse the L1 Info deposit: %w", err)
-// 	}
-//
-// 	return &SingularBatch{
-// 		ParentHash:   block.ParentHash(),
-// 		EpochNum:     rollup.Epoch(l1Info.Number),
-// 		EpochHash:    l1Info.BlockHash,
-// 		Timestamp:    block.Time(),
-// 		Transactions: opaqueTxs,
-// 	}, l1Info, nil
-// }
+/// Constructs an [L1BlockInfoTx] from the raw transaction bytes.
+pub fn l1_block_info_from_bytes(rollup_cfg: &RollupConfig, block_time: u64, data: &[u8]) -> Result<L1BlockInfoTx> {
+    // go: L1BlockInfoFromBytes
+    unimplemented!()    
+}

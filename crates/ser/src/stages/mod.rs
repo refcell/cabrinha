@@ -9,6 +9,9 @@ pub use l2_retrieval::{L2Retrieval, L2RetrievalProvider};
 mod batch_processor;
 pub use batch_processor::{BatchProcessor, BatchProcessorProvider};
 
+mod channel_builder;
+pub use channel_builder::ChannelBuilderProvider;
+
 // Stages:
 
 // - L2Traversal: has a loop that can be run in a separate thread.

@@ -16,6 +16,8 @@ async-trait.workspace = true
 alloy-primitives.workspace = true
 alloy-rpc-types.workspace = true 
 kona-derive.workspace = true
+alloy-rlp.workspace = true
+alloy-eips.workspace = true
 alloy-consensus.workspace = true
 
 # `serde` feature dependencies
