@@ -72,9 +72,9 @@ pub fn block_to_batch(cfg: &RollupConfig, block: &Block) -> Result<(SingleBatch,
 
 /// Constructs an [L1BlockInfoTx] from the raw transaction bytes.
 pub fn l1_block_info_from_bytes(
-    rollup_cfg: &RollupConfig,
-    block_time: u64,
-    data: &[u8],
+    _rollup_cfg: &RollupConfig,
+    _block_time: u64,
+    _data: &[u8],
 ) -> Result<L1BlockInfoTx> {
     // go: L1BlockInfoFromBytes
     unimplemented!()

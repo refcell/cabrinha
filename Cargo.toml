@@ -22,8 +22,9 @@ alloy-rpc-types = { version = "0.2", features = ["eth"] }
 kona-derive = { git = "https://github.com/ethereum-optimism/kona", rev = "ae71b9df103c941c06b0dc5400223c4f13fe5717" }
 serde = { version = "1.0", features = ["derive"] }
 alloy-consensus = { version = "0.2", default-features = false, features = ["k256"] }
-alloy-rlp = { version = "0.2", default-features = false }
+alloy-rlp = { version = "0.3.5", default-features = false, features = ["derive"] }
 alloy-eips = { version = "0.2", default-features = false }
+rand = { version = "0.8.3", features = ["small_rng"], default-features = false }
 
 [profile.dev]
 opt-level = 1

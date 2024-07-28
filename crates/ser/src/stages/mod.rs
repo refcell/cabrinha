@@ -12,9 +12,6 @@ pub use batch_processor::{BatchProcessor, BatchProcessorProvider};
 mod channel_builder;
 pub use channel_builder::{ChannelBuilder, ChannelBuilderProvider};
 
-mod frame_queue;
-pub use frame_queue::{FrameQueue, FrameQueueProvider};
-
 mod transaction_builder;
 pub use transaction_builder::{NextTransaction, TransactionBuilder, TransactionBuilderProvider};
 
@@ -46,8 +43,6 @@ pub use transaction_builder::{NextTransaction, TransactionBuilder, TransactionBu
 //        add_blocks(...)                               next_tx()                         new_origin()
 //               |                                          |                                  |
 //               |                               TransactionBuilder.next_tx()       TransactionQueue.new_origin()
-//               |                                          |                                  |
-//               |                                  FrameQueue.next_frame()         FrameQueue.new_origin()
 //               |                                          |                                  |
 //               |                              ChannelBuilder.next_channel()    ChannelBuilder.new_origin() --> Checks that channel is not timed out
 //               |                                          |

@@ -16,12 +16,13 @@ pub use traits::{L1Provider, L2Provider, RollupNode};
 
 mod types;
 pub use types::{
-    block_to_batch, l1_block_info_from_bytes, ChannelOut, L1BlockRef, L2BlockRef, SyncStatus,
+    block_to_batch, l1_block_info_from_bytes, BatchTransaction, ChannelOut, L1BlockRef, L2BlockRef,
+    SyncStatus,
 };
 
 mod stages;
 pub use stages::{
-    BatchProcessor, BatchProcessorProvider, ChannelBuilder, ChannelBuilderProvider, FrameQueue,
-    FrameQueueProvider, L2Retrieval, L2RetrievalProvider, L2Traversal, NextTransaction,
-    TransactionBuilder, TransactionBuilderProvider,
+    BatchProcessor, BatchProcessorProvider, ChannelBuilder, ChannelBuilderProvider, L2Retrieval,
+    L2RetrievalProvider, L2Traversal, NextTransaction, TransactionBuilder,
+    TransactionBuilderProvider,
 };
