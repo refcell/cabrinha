@@ -16,3 +16,8 @@ pub use traits::{L1Provider, L2Provider, RollupNode};
 
 mod types;
 pub use types::{block_to_batch, L1BlockRef, L2BlockRef, SyncStatus};
+
+mod stages;
+pub use stages::{
+    BatchProcessor, BatchProcessorProvider, L2Retrieval, L2RetrievalProvider, L2Traversal,
+};

@@ -16,6 +16,7 @@ async-trait.workspace = true
 alloy-primitives.workspace = true
 alloy-rpc-types.workspace = true 
 kona-derive.workspace = true
+alloy-consensus.workspace = true
 
 # `serde` feature dependencies
 serde = { workspace = true, optional = true }

@@ -1,5 +1,6 @@
 //! Providers for the chain.
 
+use crate::types::L2BlockRef;
 use alloc::boxed::Box;
 use alloy_primitives::Address;
 use alloy_rpc_types::{Block, Header};
@@ -19,6 +20,9 @@ pub trait L1Provider {
 /// A provider for the L2 Chain.
 #[async_trait]
 pub trait L2Provider {
+    /// Fetches the [L2BlockRef] by number.
+    async fn block_ref_by_number(&self, number: u64) -> Result<L2BlockRef>;
+
     /// Fetches the block with the given number.
     async fn block_by_number(&self, number: u64) -> Result<Block>;
 }
