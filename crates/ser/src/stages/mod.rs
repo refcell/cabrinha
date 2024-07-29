@@ -13,7 +13,7 @@ mod channel_builder;
 pub use channel_builder::{ChannelBuilder, ChannelBuilderProvider};
 
 mod transaction_builder;
-pub use transaction_builder::{NextTransaction, TransactionBuilder, TransactionBuilderProvider};
+pub use transaction_builder::{TransactionBuilder, TransactionBuilderProvider};
 
 // Stages:
 
