@@ -1,14 +1,30 @@
 //! Contains logic for constructing a channel.
 
+use alloc::sync::Arc;
+use alloc::vec;
 use alloc::vec::Vec;
 use alloy_rlp::Encodable;
+use anyhow::{bail, Result};
 use kona_derive::types::Frame;
 use kona_derive::types::RollupConfig;
 use kona_derive::types::SingleBatch;
 use kona_derive::ChannelID;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
-use tracing::warn;
+use tracing::{error, trace, warn};
+
+use crate::traits::Compressor;
+
+// TODO: Remove the rlp constants and use upstream [RollupConfig]
+//       max_rlp_bytes_per_channel method once merged & used in
+//       downstream `kona-derive` crate.
+//       PR: https://github.com/ethereum-optimism/superchain-registry/pull/424
+
+/// The max rlp bytes per channel for the Bedrock hardfork.
+pub(crate) const MAX_RLP_BYTES_PER_CHANNEL_BEDROCK: u64 = 10_000_000;
+
+/// The max rlp bytes per channel for the Fjord hardfork.
+pub(crate) const MAX_RLP_BYTES_PER_CHANNEL_FJORD: u64 = 100_000_000;
 
 /// The absolute minimum size of a frame.
 /// This is the fixed overhead frame size, calculated as specified
@@ -18,8 +34,8 @@ use tracing::warn;
 pub(crate) const FRAME_V0_OVERHEAD_SIZE: u64 = 23;
 
 /// The channel output type.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct ChannelOut {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChannelOut<C: Compressor> {
     /// The current channel id.
     pub id: ChannelID,
     /// The current frame number.
@@ -32,34 +48,66 @@ pub struct ChannelOut {
     /// The configured max channel size.
     /// This should come from the Chain Spec.
     pub max_frame_size: u64,
-    /// The chain config.
-    pub chain_config: RollupConfig,
+    /// The rollup config.
+    pub rollup_config: Arc<RollupConfig>,
+    /// The compressor to use.
+    pub compressor: C,
+    /// The l1 block number that the sequencer window times out.
+    pub sequencer_window_timeout: u64,
+    /// Channel duration timeout.
+    pub channel_timeout: u64,
+    /// The sub safety margin.
+    pub sub_safety_margin: u64,
 }
 
-impl ChannelOut {
+impl<C: Compressor> ChannelOut<C> {
     /// Constructs a new [ChannelOut].
-    pub fn new() -> Self {
+    pub fn new(cfg: Arc<RollupConfig>, c: C, epoch_num: u64, sub_safety_margin: u64) -> Self {
         let mut small_rng = SmallRng::from_entropy();
         let mut id = ChannelID::default();
         small_rng.fill(&mut id);
+        let max_channel_duration = Self::max_channel_duration(&cfg);
+        let sequencer_window_size = cfg.seq_window_size;
         Self {
             id,
-            ..Self::default()
+            frame: 0,
+            rlp_length: 0,
+            closed: false,
+            max_frame_size: 0,
+            rollup_config: cfg,
+            compressor: c,
+            sequencer_window_timeout: epoch_num + sequencer_window_size - sub_safety_margin,
+            channel_timeout: epoch_num + max_channel_duration,
+            sub_safety_margin,
         }
     }
 
-    /// Returns the ready bytes from the channel.
-    pub fn ready_bytes(&self) -> u64 {
-        // TODO: get the len of the compressor
+    /// Returns the max channel duration.
+    pub fn max_channel_duration(_cfg: &RollupConfig) -> u64 {
         unimplemented!()
+    }
+
+    /// Returns the ready bytes from the channel.
+    pub fn ready_bytes(&self) -> usize {
+        self.compressor.len()
     }
 
     /// Max RLP Bytes per channel.
     /// This is retrieved from the Chain Spec since it changes after the Fjord Hardfork.
     /// Uses the batch timestamp to determine the max RLP bytes per channel.
-    pub fn max_rlp_bytes_per_channel(&self, _batch: &SingleBatch) -> u64 {
-        // self.chain_config.max_rlp_bytes_per_channel(batch.timestamp);
-        unimplemented!()
+    pub fn max_rlp_bytes_per_channel(&self, batch: &SingleBatch) -> u64 {
+        if self.rollup_config.is_fjord_active(batch.timestamp) {
+            return MAX_RLP_BYTES_PER_CHANNEL_FJORD;
+        }
+        MAX_RLP_BYTES_PER_CHANNEL_BEDROCK
+    }
+
+    /// Checks if the batch is timed out.
+    pub fn check_timed_out(&mut self, l1_block_num: u64) {
+        if self.sequencer_window_timeout < l1_block_num || self.channel_timeout < l1_block_num {
+            warn!(target: "channel-out", "Batch is timed out. Closing channel: {:?}", self.id);
+            self.closed = true;
+        }
     }
 
     /// Adds a batch to the [ChannelOut].
@@ -82,17 +130,44 @@ impl ChannelOut {
 
         self.rlp_length += buf.len() as u64;
 
-        // TODO: write the buffer to the compressor
+        match self.compressor.write(&buf) {
+            Ok(n) => trace!(target: "channel-out", "Wrote {} bytes to compressor", n),
+            Err(e) => {
+                error!(target: "channel-out", "Error writing batch to compressor: {:?}", e);
+            }
+        }
+    }
+
+    /// Updates the channel timeout when a frame is published.
+    pub fn frame_published(&mut self, l1_block_num: u64) {
+        let new_timeout =
+            l1_block_num + self.rollup_config.channel_timeout - self.sub_safety_margin;
+        if self.channel_timeout > new_timeout {
+            self.channel_timeout = new_timeout;
+        }
     }
 
     /// Checks if a frame has enough bytes to output.
     pub fn frame_ready(&self) -> bool {
-        self.ready_bytes() + FRAME_V0_OVERHEAD_SIZE >= self.max_frame_size
+        self.ready_bytes() as u64 + FRAME_V0_OVERHEAD_SIZE >= self.max_frame_size
     }
 
-    /// Compress the channel to produce frame bytes.
-    pub fn compress(&mut self) -> Vec<u8> {
-        unimplemented!()
+    /// Force compress the channel to produce frame bytes.
+    pub fn flush(&mut self) -> Result<()> {
+        self.compressor.flush()
+    }
+
+    /// Compresses the channel and reads the compressed data.
+    pub fn compress(&mut self) -> Result<Vec<u8>> {
+        let mut buf = vec![0; self.ready_bytes()];
+        match self.compressor.read(&mut buf) {
+            Ok(n) => trace!(target: "channel-out", "Read {} bytes from compressor", n),
+            Err(e) => {
+                warn!(target: "channel-out", "Error reading compressed data: {:?}", e);
+                bail!("Error reading compressed data: {:?}", e);
+            }
+        }
+        Ok(buf)
     }
 
     /// Outputs the next frame if available.
@@ -101,10 +176,18 @@ impl ChannelOut {
             return None;
         }
 
+        let data = match self.compress() {
+            Ok(d) => d,
+            Err(e) => {
+                warn!(target: "channel-out", "Error compressing data: {:?}", e);
+                return None;
+            }
+        };
+
         let frame = Frame {
             id: self.id,
             number: self.frame,
-            data: self.compress(),
+            data,
             is_last: false,
         };
         self.frame += 1;
