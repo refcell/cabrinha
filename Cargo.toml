@@ -17,7 +17,7 @@ exclude = ["**/target", "benches/", "tests"]
 anyhow = { version = "1.0", default-features = false }
 tracing = { version = "0.1", default-features = false }
 async-trait = "0.1"
-alloy-primitives = "0.2"
+alloy-primitives = "0.7"
 alloy-rpc-types = { version = "0.2", features = ["eth"] }
 kona-derive = { git = "https://github.com/ethereum-optimism/kona", rev = "ae71b9df103c941c06b0dc5400223c4f13fe5717" }
 serde = { version = "1.0", features = ["derive"] }
