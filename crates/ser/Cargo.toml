@@ -22,7 +22,7 @@ alloy-consensus.workspace = true
 rand.workspace = true
 
 # Compression
-miniz_oxide = "0.7.3"
+miniz_oxide = "0.8.0"
 brotli = { version = "6.0.0", default-features = false }
 
 # `serde` feature dependencies
